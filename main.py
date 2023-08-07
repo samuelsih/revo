@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from schema import SignupSchema
 from customizer import http_customize_handler, validation_body_exception_handler
@@ -10,6 +11,13 @@ config = Config()
 signup_handler = SignupHandler(config.fb_app)
 app = FastAPI(
     debug=config.is_production, docs_url=None if config.is_production else "/docs"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin=["*"],
+    allow_credentials=True,
+    allow_methods=["POST", "OPTIONS"],
 )
 
 validation_body_exception_handler(app)
