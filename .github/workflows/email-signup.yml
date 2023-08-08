@@ -1,10 +1,14 @@
-name: Za Workflows
+name: Email Signup
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'email-signup/**'
   pull_request:
-    branches: [ main ]  
+    branches: [ main ] 
+    paths:
+      - 'email-signup/**' 
   
 jobs:
   lint:
