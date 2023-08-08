@@ -1,8 +1,14 @@
+REGION = asia-east1
+
 run:
-	uvicorn main:app --reload
+	functions-framework --target=signup
 
-build:
-	docker build -t revo-auth:1.0.0 .
-
-up:
-	docker run -d -p 8000:8000 -e PORT=8000 --name revo-auth-container revo-auth:1.0.0
+deploy:
+	gcloud functions deploy signup_fn \
+	--gen2 \
+	--runtime=python311 \
+	--region=$(REGION) \
+	--trigger-location=$(REGION) \
+	--source=. \
+	--entry-point=signup \
+	--timeout=540 \
