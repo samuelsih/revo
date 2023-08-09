@@ -9,6 +9,10 @@ on:
     branches: [ main ] 
     paths:
       - 'create-voting/**' 
+  
+defaults:
+  run:
+    working-directory: ./create-voting
 
 jobs:
   golangci:
@@ -43,7 +47,7 @@ jobs:
         run: go mod tidy
 
       - name: Go Test
-        run: go test -v -failfast -race ./...
+        run: go test -v -race
 
       - name: Go Build
-        run: go build -v ./...
+        run: go build -v 
