@@ -10,7 +10,10 @@ FunctionsFramework::cloudEvent('cleanup', 'cleanup');
 // phpcs:enable
 function cleanup(CloudEventInterface $event): void
 {
+    /** @var array|string|false $projectId */
     $projectId = getenv('PROJECT_ID');
+
+    /** @var array|string|false $bucketName */
     $bucketName = getenv('BUCKET_NAME');
 
     $storage = new StorageClient([ 'projectId' => $projectId ]);
@@ -22,8 +25,6 @@ function cleanup(CloudEventInterface $event): void
 
     /** @var string $objectName */
     $objectName = $eventData['objectName'];
-
-    global $clientBucket;
 
     $obj = $clientBucket->object($objectName);
     $obj->delete();
