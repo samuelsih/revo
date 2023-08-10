@@ -1,4 +1,6 @@
 runtime: java17
+inbound_services:
+  - warmup
 env_variables:
   ACCESS_KEY:
   SECRET_KEY:

@@ -1,0 +1,9 @@
+name = "voting-dynamodb-keepalive"
+main = "src/index.ts"
+compatibility_date = "2023-08-10"
+
+[triggers]
+crons = ["0 * * * *"]
+
+[vars]
+VOTING_URL = "http://localhost:8080/warmup"

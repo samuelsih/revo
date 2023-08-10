@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/")
 public class MainController {
     private final VotingService service;
 
@@ -22,5 +22,17 @@ public class MainController {
     public ResponseEntity<Object> store(@RequestBody Voting voting) {
         this.service.saveVote(voting);
         return Response.make(HttpStatus.CREATED, "Vote created!");
+    }
+
+    @GetMapping("/_ah/warmup")
+    public ResponseEntity<Object> appEngineWarmup() {
+        var result = this.service.getListTables();
+        return Response.make(HttpStatus.OK, "OK", result);
+    }
+
+    @GetMapping("/warmup")
+    public ResponseEntity<Object> keepAlive() {
+        var result = this.service.getListTables();
+        return Response.make(HttpStatus.OK, "OK", result);
     }
 }

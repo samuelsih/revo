@@ -18,4 +18,9 @@ public class VotingServiceImpl implements VotingService {
     public void saveVote(Voting voting) {
         this.repository.store(voting);
     }
+
+    @Override
+    public Object getListTables() {
+        return this.repository.getListTables();
+    }
 }
