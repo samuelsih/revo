@@ -3,7 +3,7 @@
   "description": "Cleaning Up Resources in GCS",
   "type": "project",
   "require": {
-    "google/cloud-functions-framework": "1.3",
+    "google/cloud-functions-framework": "1.*",
     "google/cloud-storage": "^1.33"
   },
   "license": "MIT",
