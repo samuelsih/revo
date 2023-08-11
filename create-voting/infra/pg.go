@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/xid"
 )
 
@@ -36,7 +37,7 @@ RETURNING id
 ;
 `
 
-func SaveVotingTheme(db *pgx.Conn) SaveVotingThemeFunc {
+func SaveVotingTheme(db *pgxpool.Pool) SaveVotingThemeFunc {
 	return func(ctx context.Context, userID string, startAt, endAt time.Time, metadata string) (string, error) {
 		id := xid.New().String()
 
@@ -63,7 +64,7 @@ WHERE id = $1
 ;
 `
 
-func FindVotingTheme(db *pgx.Conn) FindVotingThemeFunc {
+func FindVotingTheme(db *pgxpool.Pool) FindVotingThemeFunc {
 	return func(ctx context.Context, id string) (time.Time, error) {
 		var result time.Time
 
