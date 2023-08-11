@@ -33,11 +33,11 @@ type AppConfig struct {
 var appConfig AppConfig
 
 func init() {
-	var isProd bool
+	var isProd int
 
-	flag.BoolVar(&isProd, "prod", false, "set development status")
+	flag.IntVar(&isProd, "mode", 2, "set development status")
 
-	if !isProd {
+	if isProd == 1 {
 		slog.Info("Running on dev mode")
 		if err := godotenv.Load(".env"); err != nil {
 			slog.Error("cannot get env: %v", err)
