@@ -14,7 +14,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/samuelsih/revo-voting/infra"
 	"github.com/samuelsih/revo-voting/pb"
@@ -67,13 +67,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	pg, err := pgx.Connect(ctx, appConfig.DBURL)
+	pg, err := pgxpool.New(ctx, appConfig.DBURL)
 	if err != nil {
 		slog.Error("failed create db client: %v", err)
 		os.Exit(1)
 	}
 
-	defer pg.Close(ctx)
+	defer pg.Close()
 
 	err = pg.Ping(ctx)
 	if err != nil {

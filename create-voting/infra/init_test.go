@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
@@ -72,7 +72,7 @@ func startPostgresDB(ctx context.Context, pool *dockertest.Pool) *dockertest.Res
 	}
 
 	if err = pool.Retry(func() error {
-		dbTest, err = pgx.Connect(context.Background(), databaseURL)
+		dbTest, err = pgxpool.New(context.Background(), databaseURL)
 		if err != nil {
 			return err
 		}

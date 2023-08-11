@@ -6,12 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var dbTest *pgx.Conn
+var dbTest *pgxpool.Pool
 
 func TestVotingSaver(t *testing.T) {
+	t.Parallel()
+
 	saver := SaveVotingTheme(dbTest)
 	id, err := saver.SaveVotingTheme(context.TODO(), "9898989", time.Now(), time.Now().Add(5*time.Hour), `{"a": "b"}`)
 	if err != nil {
@@ -24,9 +26,12 @@ func TestVotingSaver(t *testing.T) {
 }
 
 func TestFindVotingTheme(t *testing.T) {
+	t.Parallel()
+
 	finder := FindVotingTheme(dbTest)
 
 	t.Run("valid", func(t *testing.T) {
+		t.Parallel()
 		endAt, err := finder.FindVotingTheme(context.TODO(), "some-id")
 		if err != nil {
 			t.Errorf("err find: %v", err)
@@ -41,6 +46,7 @@ func TestFindVotingTheme(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
 		_, err := finder.FindVotingTheme(context.TODO(), "unknown-id")
 		if err == nil {
 			t.Error("err is nil")
