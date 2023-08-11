@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"log"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
@@ -53,15 +52,13 @@ func CreateVotingThemeHandler(deps Dependencies) http.HandlerFunc {
 	var formInput allMetadata
 
 	return httpwr.HandlerFn(func(w http.ResponseWriter, r *http.Request) error {
-		log.Println(r.Header)
+		r.Body = http.MaxBytesReader(w, r.Body, 5*oneMB)
 
 		err := r.ParseMultipartForm(5 * oneMB)
 		if err != nil {
 			slog.Error("Parse Error: %v", err)
 			return httpwr.Wrap(http.StatusRequestEntityTooLarge, err)
 		}
-
-		r.Body = http.MaxBytesReader(w, r.Body, 5*oneMB)
 
 		reader := strings.NewReader(r.FormValue("metadata"))
 		err = serialize(reader, &formInput)

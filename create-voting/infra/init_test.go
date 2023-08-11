@@ -96,6 +96,29 @@ func startPostgresDB(ctx context.Context, pool *dockertest.Pool) *dockertest.Res
 		log.Fatalf("Could not create table: %v", err)
 	}
 
+	_, err = dbTest.Exec(ctx, `INSERT INTO
+		voting_theme (id, user_id, start_at, end_at, metadata)
+		VALUES
+			(
+			'some-id',
+			'user',
+			'2023-08-09 13:45:55.330487+00',
+			'2023-08-09 18:45:55.330487+00',
+			'[
+				{
+					"name":"sdsdsdsds",
+					"img_link":"https://storage.googleapis.com/",
+					"description":"dsdsukiteyosdsdsukiteyosdsdsusdsd"
+				}
+			 ]'
+			)
+		;`,
+	)
+
+	if err != nil {
+		log.Fatalf("Could not insert to table: %v", err)
+	}
+
 	return resource
 }
 

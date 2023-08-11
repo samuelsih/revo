@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/pubsub"
@@ -15,6 +17,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 	"github.com/samuelsih/revo-voting/infra"
+	"github.com/samuelsih/revo-voting/pb"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type AppConfig struct {
@@ -28,13 +33,12 @@ type AppConfig struct {
 var appConfig AppConfig
 
 func init() {
-	var isProd bool
+	var isProd int
 
-	flag.BoolVar(&isProd, "prod", true, "set development status")
+	flag.IntVar(&isProd, "mode", 2, "set development status")
 
-	if !isProd {
+	if isProd == 1 {
 		slog.Info("Running on dev mode")
-
 		if err := godotenv.Load(".env"); err != nil {
 			slog.Error("cannot get env: %v", err)
 			os.Exit(1)
@@ -82,12 +86,15 @@ func main() {
 	publisher := infra.Publisher(t)
 	uploader := infra.Uploader(storageCLient, appConfig.BucketName)
 	persister := infra.SaveVotingTheme(pg)
+	finder := infra.FindVotingTheme(pg)
 
 	deps := Dependencies{
 		Publisher:        publisher,
 		Uploader:         uploader,
 		VotingThemeSaver: persister,
 	}
+
+	grpcServer := pb.Server(finder)
 
 	r.Use(
 		middleware.Logger,
@@ -97,18 +104,32 @@ func main() {
 
 	r.Post("/voting", CreateVotingThemeHandler(deps))
 
-	server := &http.Server{
+	mixedHandler := newHTTPandGRPCMux(r, grpcServer)
+	combinedServer := &http.Server{
 		Addr:         ":" + appConfig.Port,
-		Handler:      r,
+		Handler:      h2c.NewHandler(mixedHandler, &http2.Server{}),
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
-	slog.Info("Server Start")
+	slog.Info("Server Starting...")
 
-	err = server.ListenAndServe()
-	if err != nil {
-		slog.Error("cant serve: %v", err)
+	err = combinedServer.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		slog.Error("Server closed: %v", err)
 		os.Exit(1)
 	}
+}
+
+func newHTTPandGRPCMux(httpHand http.Handler, grpcHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		isgRPC := strings.HasPrefix(r.Header.Get("content-type"), "application/grpc")
+
+		if r.ProtoMajor == 2 && isgRPC {
+			grpcHandler.ServeHTTP(w, r)
+			return
+		}
+
+		httpHand.ServeHTTP(w, r)
+	})
 }

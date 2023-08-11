@@ -69,6 +69,16 @@ func CreateVotingThemeService(ctx context.Context, deps Dependencies, inputs []v
 	rawMetadata := make([]jsonbMetadata, len(inputs))
 
 	for i, input := range inputs {
+		if input.Image == nil {
+			rawMetadata[i] = jsonbMetadata{
+				Name:        input.Name,
+				Description: input.Description,
+				ImgLink:     "",
+			}
+
+			continue
+		}
+
 		str := randomStr(16)
 		url, err := deps.Uploader.Upload(ctx, str, input.Image)
 		if err != nil {
