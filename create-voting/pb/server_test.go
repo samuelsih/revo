@@ -36,7 +36,6 @@ func startingServer() (ag.VoteStatusServiceClient, func()) {
 		}),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-
 	if err != nil {
 		slog.Error("error connecting to server: %v", err)
 		os.Exit(1)

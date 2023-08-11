@@ -75,7 +75,7 @@ func CreateVotingThemeService(ctx context.Context, deps Dependencies, inputs []v
 				Description: input.Description,
 				ImgLink:     "",
 			}
-			
+
 			continue
 		}
 

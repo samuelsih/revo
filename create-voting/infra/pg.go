@@ -9,9 +9,7 @@ import (
 	"github.com/rs/xid"
 )
 
-var (
-	ErrVotingThemeNotFound = errors.New("unknown voting")
-)
+var ErrVotingThemeNotFound = errors.New("unknown voting")
 
 type SaveVotingThemeFunc func(
 	ctx context.Context,
@@ -70,7 +68,6 @@ func FindVotingTheme(db *pgx.Conn) FindVotingThemeFunc {
 		var result time.Time
 
 		err := db.QueryRow(ctx, findThemeQuery, id).Scan(&result)
-
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return result, ErrVotingThemeNotFound

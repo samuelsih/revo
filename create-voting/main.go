@@ -54,13 +54,13 @@ func init() {
 func main() {
 	r := chi.NewRouter()
 	ctx := context.Background()
-	
+
 	pubsubClient, err := pubsub.NewClient(ctx, appConfig.ProjectID)
 	if err != nil {
 		slog.Error("failed create pubsub client: %v", err)
 		os.Exit(1)
 	}
-	
+
 	storageCLient, err := storage.NewClient(ctx)
 	if err != nil {
 		slog.Error("failed create storage client: %v", err)
@@ -74,28 +74,28 @@ func main() {
 	}
 
 	defer pg.Close(ctx)
-	
+
 	err = pg.Ping(ctx)
 	if err != nil {
 		slog.Error("failed ping pg client: %v", err)
 		os.Exit(1)
 	}
-	
+
 	t := pubsubClient.Topic(appConfig.PubSubTopic)
-	
+
 	publisher := infra.Publisher(t)
 	uploader := infra.Uploader(storageCLient, appConfig.BucketName)
 	persister := infra.SaveVotingTheme(pg)
 	finder := infra.FindVotingTheme(pg)
-	
+
 	deps := Dependencies{
 		Publisher:        publisher,
 		Uploader:         uploader,
 		VotingThemeSaver: persister,
 	}
-	
+
 	grpcServer := pb.Server(finder)
-	
+
 	r.Use(
 		middleware.Logger,
 		middleware.Recoverer,

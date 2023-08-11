@@ -104,7 +104,13 @@ func startPostgresDB(ctx context.Context, pool *dockertest.Pool) *dockertest.Res
 			'user',
 			'2023-08-09 13:45:55.330487+00',
 			'2023-08-09 18:45:55.330487+00',
-			'[{"name":"sdsdsdsds","img_link":"https://storage.googleapis.com/","description":"dsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsdsukiteyosdsd"}]'
+			'[
+				{
+					"name":"sdsdsdsds",
+					"img_link":"https://storage.googleapis.com/",
+					"description":"dsdsukiteyosdsdsukiteyosdsdsusdsd"
+				}
+			 ]'
 			)
 		;`,
 	)
