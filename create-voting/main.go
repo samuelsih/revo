@@ -26,7 +26,7 @@ type AppConfig struct {
 	ProjectID   string `env:"PROJECT_ID"`
 	PubSubTopic string `env:"PUBSUB_TOPIC"`
 	BucketName  string `env:"BUCKET_NAME"`
-	Port        string `env:"PORT" default:"8080"`
+	Port        string `env:"PORT" default:"7000"`
 	DBURL       string `env:"DB_URL"`
 }
 
@@ -35,7 +35,7 @@ var appConfig AppConfig
 func init() {
 	var isProd int
 
-	flag.IntVar(&isProd, "mode", 2, "set development status")
+	flag.IntVar(&isProd, "mode", 1, "set development status")
 
 	if isProd == 1 {
 		slog.Info("Running on dev mode")

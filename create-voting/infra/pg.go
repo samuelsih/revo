@@ -3,11 +3,14 @@ package infra
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/xid"
+	"gopkg.in/guregu/null.v4"
 )
 
 var ErrVotingThemeNotFound = errors.New("unknown voting")
@@ -51,32 +54,42 @@ func SaveVotingTheme(db *pgxpool.Pool) SaveVotingThemeFunc {
 	}
 }
 
-type FindVotingThemeFunc func(ctx context.Context, id string) (time.Time, error)
+type FindVotingThemeFunc func(ctx context.Context, id string, pos int) (time.Time, FindVotingMetadata, error)
 
-func (f FindVotingThemeFunc) FindVotingTheme(ctx context.Context, id string) (time.Time, error) {
-	return f(ctx, id)
+func (f FindVotingThemeFunc) FindVotingTheme(ctx context.Context, id string, pos int) (time.Time, FindVotingMetadata, error) {
+	return f(ctx, id, pos)
+}
+
+type FindVotingMetadata = struct {
+	Name        null.String `name:"name"`
+	Description null.String `name:"description"`
+	ImgLink     null.String `name:"img_link"`
 }
 
 const findThemeQuery = `
-SELECT end_at
+SELECT end_at, metadata->%d->'name', metadata->%d->'description', metadata->%d->'img_link'
 FROM voting_theme
 WHERE id = $1
 ;
 `
 
 func FindVotingTheme(db *pgxpool.Pool) FindVotingThemeFunc {
-	return func(ctx context.Context, id string) (time.Time, error) {
-		var result time.Time
+	return func(ctx context.Context, id string, pos int) (time.Time, FindVotingMetadata, error) {
+		q := fmt.Sprintf(findThemeQuery, pos, pos, pos)
 
-		err := db.QueryRow(ctx, findThemeQuery, id).Scan(&result)
+		var findVotingTheme FindVotingMetadata
+		var endAt time.Time
+
+		err := db.QueryRow(ctx, q, id).Scan(&endAt, &findVotingTheme.Name, &findVotingTheme.Description, &findVotingTheme.ImgLink)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				return result, ErrVotingThemeNotFound
+				return endAt, findVotingTheme, ErrVotingThemeNotFound
 			}
 
-			return result, err
+			slog.Error(err.Error())
+			return endAt, findVotingTheme, err
 		}
 
-		return result, nil
+		return endAt, findVotingTheme, nil
 	}
 }

@@ -8,7 +8,7 @@ public class Voting {
 
     private final String userId;
     private final long voteAtUnix;
-    private final String voteTo;
+    private final int voteTo;
     private final String voteId;
     private final String name;
     private final String description;
@@ -56,7 +56,7 @@ public class Voting {
     }
 
     @DynamoDbAttribute("vote_to")
-    public String voteTo() {
+    public int voteTo() {
         return this.voteTo;
     }
 
@@ -68,7 +68,7 @@ public class Voting {
     public static final class Builder {
         private String userId;
         private long voteAtUnix;
-        private String voteTo;
+        private int voteTo;
         private String name;
         private String description;
         private String imgLink;
@@ -86,7 +86,7 @@ public class Voting {
             return this;
         }
 
-        public Builder voteTo(String voteTo) {
+        public Builder voteTo(int voteTo) {
             this.voteTo = voteTo;
             return this;
         }

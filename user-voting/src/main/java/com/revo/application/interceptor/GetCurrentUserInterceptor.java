@@ -15,6 +15,10 @@ public class GetCurrentUserInterceptor implements HandlerInterceptor {
             @NonNull HttpServletResponse response,
             @NonNull Object handler
     ) throws Exception {
+        if (request.getRequestURI().equals("/warmup")) {
+            return true;
+        }
+
         String credentials = request.getHeader("_user");
         User user = this.extractFrom(credentials);
         request.setAttribute("user", user);

@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Constraint(validatedBy = OneOfValidator.class)
 public @interface OneOf {
-    String[] allowedValues();
+    int[] allowedValue();
     String message() default "invalid vote to choose";
     Class<?> [] groups() default {};
     Class<? extends Payload>[] payload() default {};
