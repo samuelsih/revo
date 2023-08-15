@@ -32,7 +32,7 @@ func TestFindVotingTheme(t *testing.T) {
 
 	t.Run("valid", func(t *testing.T) {
 		t.Parallel()
-		endAt, err := finder.FindVotingTheme(context.TODO(), "some-id")
+		endAt, _, err := finder.FindVotingTheme(context.TODO(), "some-id", 0)
 		if err != nil {
 			t.Errorf("err find: %v", err)
 		}
@@ -47,7 +47,7 @@ func TestFindVotingTheme(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		t.Parallel()
-		_, err := finder.FindVotingTheme(context.TODO(), "unknown-id")
+		_, _, err := finder.FindVotingTheme(context.TODO(), "unknown-id", 0)
 		if err == nil {
 			t.Error("err is nil")
 		}

@@ -1,20 +1,21 @@
 package com.revo.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.revo.application.validation.OneOf;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Getter;
 
+
+@Data
 public class VotingDTO {
     @JsonProperty("vote_id")
-    @NotEmpty(message = "unknown vote request")
-    @Getter
+    @NotNull(message = "unknown vote request")
     private String voteId;
 
     @JsonProperty("choose")
-    @NotEmpty(message = "please choose one to vote")
-    @OneOf(allowedValues = {"1", "2", "3", "4"})
-    @Getter
-    private String choose;
+    @NotNull(message = "please choose one to vote")
+    @Min(value = 0, message = "invalid choose")
+    @Max(value = 3, message = "invalid choose")
+    private int choose;
 }

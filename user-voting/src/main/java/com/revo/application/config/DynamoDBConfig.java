@@ -57,7 +57,6 @@ public class DynamoDBConfig {
     }
 
     private DynamoDbClient getDynamoDbClient() {
-        log.info(toString());
         return DynamoDbClient
                 .builder()
                 .credentialsProvider(this.getProvider())

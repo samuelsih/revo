@@ -2,12 +2,15 @@ package com.revo.application.controller;
 
 import com.revo.application.dto.VotingDTO;
 import com.revo.application.entity.User;
+import com.revo.application.exception.ExpiredVotingTimeException;
+import com.revo.application.exception.VotingNotFoundException;
 import com.revo.application.response.Response;
 import com.revo.application.service.VotingService;
+import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,11 +25,11 @@ public class MainController {
 
     @PostMapping("/vote")
     public ResponseEntity<Object> storeVote(
-            @RequestAttribute("user") User user,
-            @Validated VotingDTO dto
-    ) {
-        this.service.saveVote(dto, user);
-        return Response.make(HttpStatus.CREATED, "Vote has been created");
+            @RequestAttribute("user") @NonNull User user,
+            @RequestBody @Valid VotingDTO dto
+    ) throws ExpiredVotingTimeException, VotingNotFoundException {
+        var result = this.service.saveVote(dto, user);
+        return Response.make(HttpStatus.CREATED, result);
     }
 
     @GetMapping("/_ah/warmup")
