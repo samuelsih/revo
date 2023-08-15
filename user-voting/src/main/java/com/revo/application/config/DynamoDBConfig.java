@@ -1,14 +1,16 @@
 package com.revo.application.config;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+
 
 @Configuration
 @Slf4j
@@ -25,33 +27,41 @@ public class DynamoDBConfig {
     @Value("${amazon.aws.region}")
     public String region;
 
-    private AmazonDynamoDB db;
+    private AwsCredentials getCredentials() {
+        return AwsBasicCredentials.create(this.accessKey, this.secretKey);
+    }
 
-    private void amazonDynamoDB() {
-        ClientConfiguration config = new ClientConfiguration();
-        config.setRequestTimeout(1000);
-        config.setClientExecutionTimeout(5 * 1000);
-        config.setUseTcpKeepAlive(true);
+    private StaticCredentialsProvider getProvider() {
+        return StaticCredentialsProvider.create(this.getCredentials());
+    }
 
-        var customProvider = new AwsCustomCredentialsProvider(accessKey, secretKey);
-        var endpointConfig = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
+    private Region getRegion() {
+        return Region.of(this.region);
+    }
 
-        this.db = AmazonDynamoDBClientBuilder
-                .standard()
-                .withClientConfiguration(config)
-                .withEndpointConfiguration(endpointConfig)
-                .withCredentials(customProvider)
+    @Bean
+    public DynamoDbClient dynamoDbClient() {
+        log.info("DynamoDB setup...");
+
+        return this.getDynamoDbClient();
+    }
+
+    @Bean
+    public DynamoDbEnhancedClient dynamoDbEnhancedClient() {
+        log.info("DynamoDB Enhanced setup...");
+
+        return DynamoDbEnhancedClient
+                .builder()
+                .dynamoDbClient(this.getDynamoDbClient())
                 .build();
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void startDynamoDB() {
-        log.info("DynamoDB Start On Ready Event!");
-        this.amazonDynamoDB();
-        log.info("DynamoDB Ready!");
-    }
-
-    public AmazonDynamoDB getInstance() {
-        return this.db;
+    private DynamoDbClient getDynamoDbClient() {
+        log.info(toString());
+        return DynamoDbClient
+                .builder()
+                .credentialsProvider(this.getProvider())
+                .region(this.getRegion())
+                .build();
     }
 }
