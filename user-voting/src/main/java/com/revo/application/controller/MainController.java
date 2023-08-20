@@ -4,6 +4,7 @@ import com.revo.application.dto.VotingDTO;
 import com.revo.application.entity.User;
 import com.revo.application.exception.ExpiredVotingTimeException;
 import com.revo.application.exception.VotingNotFoundException;
+import com.revo.application.exception.VotingServerErrorException;
 import com.revo.application.response.Response;
 import com.revo.application.service.VotingService;
 import jakarta.validation.Valid;
@@ -27,7 +28,7 @@ public class MainController {
     public ResponseEntity<Object> storeVote(
             @RequestAttribute("user") @NonNull User user,
             @RequestBody @Valid VotingDTO dto
-    ) throws ExpiredVotingTimeException, VotingNotFoundException {
+    ) throws ExpiredVotingTimeException, VotingNotFoundException, VotingServerErrorException {
         var result = this.service.saveVote(dto, user);
         return Response.make(HttpStatus.CREATED, result);
     }

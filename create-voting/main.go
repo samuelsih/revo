@@ -35,7 +35,7 @@ var appConfig AppConfig
 func init() {
 	var isProd int
 
-	flag.IntVar(&isProd, "mode", 1, "set development status")
+	flag.IntVar(&isProd, "mode", 2, "set development status")
 
 	if isProd == 1 {
 		slog.Info("Running on dev mode")

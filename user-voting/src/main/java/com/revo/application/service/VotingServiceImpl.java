@@ -7,6 +7,7 @@ import com.revo.application.entity.VoteData;
 import com.revo.application.entity.Voting;
 import com.revo.application.exception.ExpiredVotingTimeException;
 import com.revo.application.exception.VotingNotFoundException;
+import com.revo.application.exception.VotingServerErrorException;
 import com.revo.application.gRPC.client.VoteStatusServiceClient;
 import com.revo.application.repository.VotingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,15 @@ public class VotingServiceImpl implements VotingService {
     }
 
     @Override
-    public String saveVote(VotingDTO dto, User user) throws ExpiredVotingTimeException, VotingNotFoundException {
+    public String saveVote(VotingDTO dto, User user)
+            throws ExpiredVotingTimeException,
+            VotingNotFoundException,
+            VotingServerErrorException
+    {
         String voteId = dto.getVoteId();
         int position = dto.getChoose();
 
         VoteData voteData = this.voteStatusServiceClient.checkVoteStatus(voteId, position);
-        System.out.println(voteData.status());
 
         if(voteData.status().equals(Status.EXPIRED)) {
             throw new ExpiredVotingTimeException();
@@ -39,6 +43,10 @@ public class VotingServiceImpl implements VotingService {
 
         if(voteData.status().equals(Status.NOT_FOUND)) {
             throw new VotingNotFoundException();
+        }
+
+        if(voteData.status().equals(Status.SERVER_ERROR)) {
+            throw new VotingServerErrorException();
         }
 
         Voting entity = Voting.builder()
