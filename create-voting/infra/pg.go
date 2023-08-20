@@ -56,7 +56,11 @@ func SaveVotingTheme(db *pgxpool.Pool) SaveVotingThemeFunc {
 
 type FindVotingThemeFunc func(ctx context.Context, id string, pos int) (time.Time, FindVotingMetadata, error)
 
-func (f FindVotingThemeFunc) FindVotingTheme(ctx context.Context, id string, pos int) (time.Time, FindVotingMetadata, error) {
+func (f FindVotingThemeFunc) FindVotingTheme(
+	ctx context.Context,
+	id string,
+	pos int,
+) (time.Time, FindVotingMetadata, error) {
 	return f(ctx, id, pos)
 }
 
@@ -80,7 +84,13 @@ func FindVotingTheme(db *pgxpool.Pool) FindVotingThemeFunc {
 		var findVotingTheme FindVotingMetadata
 		var endAt time.Time
 
-		err := db.QueryRow(ctx, q, id).Scan(&endAt, &findVotingTheme.Name, &findVotingTheme.Description, &findVotingTheme.ImgLink)
+		err := db.QueryRow(ctx, q, id).Scan(
+			&endAt,
+			&findVotingTheme.Name,
+			&findVotingTheme.Description,
+			&findVotingTheme.ImgLink,
+		)
+
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return endAt, findVotingTheme, ErrVotingThemeNotFound
